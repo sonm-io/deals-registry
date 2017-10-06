@@ -1,4 +1,4 @@
-pragma solidity ^0.4.16;
+pragma solidity ^0.4.14;
 
 
 import 'zeppelin-solidity/contracts/token/StandardToken.sol';

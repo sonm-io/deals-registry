@@ -1,4 +1,4 @@
-pragma solidity ^0.4.16;
+pragma solidity ^0.4.14;
 
 
 import "./IterableMapping.sol";
@@ -20,10 +20,15 @@ contract Deals {
     Status status;
     }
 
+    event DealOpened(address hub, address client, uint index);
+    event DealAccepted(address hub, address client, uint index);
+    event DealClosed(address hub, address client, uint index);
+
     uint dealAmount = 0;
 
     mapping (uint => Deal) deals;
 
+    // Client => []Hubs => []Deals
     mapping (address => IterableMapping.itmap) dealsIndex;
 
     function OpenDeal(address _client, uint256 _specHash, uint256 _price){
@@ -40,16 +45,22 @@ contract Deals {
 
         // create index of this deal
         IterableMapping.insert(dealsIndex[_client], uint144(bytes20(hubAddress) >> 16), dealIndex);
+
+        DealOpened(hubAddress, clientAddress, dealIndex);
     }
 
     function AcceptDeal(uint dealIndex) {
         require(msg.sender == deals[dealIndex].client);
         deals[dealIndex].status = Status.Accepted;
+
+        DealAccepted(deals[dealIndex].hub, deals[dealIndex].client, dealIndex);
     }
 
     function CloseDeal(uint dealIndex) {
         require(msg.sender == deals[dealIndex].hub);
         deals[dealIndex].status = Status.Closed;
+
+        DealClosed(deals[dealIndex].hub, deals[dealIndex].client, dealIndex);
     }
 
     function GetDealInfo(uint dealIndex) returns (uint specHach, address client, address hub, uint price, uint status){
@@ -57,4 +68,8 @@ contract Deals {
         return (deal.specificationHash, deal.client, deal.hub, deal.price, uint(deal.status));
     }
 
+    function GetDealAmount() returns (uint){
+        return dealAmount;
+    }
+    
 }

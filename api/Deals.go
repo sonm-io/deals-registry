@@ -14,18 +14,18 @@ import (
 )
 
 // DealsABI is the input ABI used to generate the binding from.
-const DealsABI = "[{\"constant\":false,\"inputs\":[],\"name\":\"GetDealAmount\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"dealIndex\",\"type\":\"uint256\"}],\"name\":\"GetDealInfo\",\"outputs\":[{\"name\":\"specHach\",\"type\":\"uint256\"},{\"name\":\"client\",\"type\":\"address\"},{\"name\":\"hub\",\"type\":\"address\"},{\"name\":\"price\",\"type\":\"uint256\"},{\"name\":\"status\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"dealIndex\",\"type\":\"uint256\"}],\"name\":\"AcceptDeal\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"dealIndex\",\"type\":\"uint256\"}],\"name\":\"CloseDeal\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_client\",\"type\":\"address\"},{\"name\":\"_specHash\",\"type\":\"uint256\"},{\"name\":\"_price\",\"type\":\"uint256\"}],\"name\":\"OpenDeal\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"hub\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"client\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"DealOpened\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"hub\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"client\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"DealAccepted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"hub\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"client\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"DealClosed\",\"type\":\"event\"}]"
+const DealsABI = "[{\"constant\":false,\"inputs\":[],\"name\":\"GetDealAmount\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"dealIndex\",\"type\":\"uint256\"}],\"name\":\"GetDealInfo\",\"outputs\":[{\"name\":\"specHach\",\"type\":\"uint256\"},{\"name\":\"client\",\"type\":\"address\"},{\"name\":\"hub\",\"type\":\"address\"},{\"name\":\"price\",\"type\":\"uint256\"},{\"name\":\"status\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"dealIndex\",\"type\":\"uint256\"}],\"name\":\"AcceptDeal\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"},{\"name\":\"_price\",\"type\":\"uint256\"}],\"name\":\"IsPriceAllowed\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"dealIndex\",\"type\":\"uint256\"}],\"name\":\"CloseDeal\",\"outputs\":[],\"payable\":true,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_hub\",\"type\":\"address\"},{\"name\":\"_specHash\",\"type\":\"uint256\"},{\"name\":\"_price\",\"type\":\"uint256\"}],\"name\":\"OpenDeal\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"inputs\":[{\"name\":\"_token\",\"type\":\"address\"}],\"payable\":false,\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"hub\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"client\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"DealOpened\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"hub\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"client\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"DealAccepted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"hub\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"client\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"DealClosed\",\"type\":\"event\"}]"
 
 // DealsBin is the compiled bytecode used for deploying new contracts.
-const DealsBin = `0x606060405260008055341561001357600080fd5b5b61059b806100236000396000f300606060405263ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166330e8e25d81146100695780635ad5f6ae1461008e5780635be20de2146100e1578063ca6ad1bf146100f9578063cdb0017514610111575b600080fd5b341561007457600080fd5b61007c610138565b60405190815260200160405180910390f35b341561009957600080fd5b6100a460043561013f565b604051948552600160a060020a039384166020860152919092166040808501919091526060840192909252608083015260a0909101905180910390f35b34156100ec57600080fd5b6100f76004356101a7565b005b341561010457600080fd5b6100f7600435610270565b005b341561011c57600080fd5b6100f7600160a060020a036004351660243560443561033d565b005b6000545b90565b6000818152600160208190526040822080549181015460028083015460038401546004850154879687968796879691959294600160a060020a039182169491909316929160ff9091169081111561019257fe5b955095509550955095505b5091939590929450565b6000818152600160208190526040909120015433600160a060020a039081169116146101d257600080fd5b6000818152600160208190526040909120600401805460ff191682805b021790555060008181526001602081905260409182902060028101549101547f3a38edea6028913403c74ce8433c90eca94f4ca074d318d8cb77be5290ba4f1592600160a060020a039283169290911690849051600160a060020a039384168152919092166020820152604080820192909252606001905180910390a15b50565b60008181526001602052604090206002015433600160a060020a0390811691161461029a57600080fd5b6000818152600160208190526040909120600401805460029260ff1990911690835b021790555060008181526001602081905260409182902060028101549101547f72615f99a62a6cc2f8452d5c0c9cbc5683995297e1d988f09bb1471d4eefb89092600160a060020a039283169290911690849051600160a060020a039384168152919092166020820152604080820192909252606001905180910390a15b50565b60008054600101908190553390849060a06040519081016040908152868252600160a060020a038085166020840152851690820152606081018590526080810160005b9052600082815260016020526040902081518155602082015160018201805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0392909216919091179055604082015160028201805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a039290921691909117905560608201518160030155608082015160048201805460ff1916600183600281111561042357fe5b02179055505050600160a060020a03861660009081526002602052604080822073__IterableMapping_______________________92637e523645926c01000000000000000000000000620100006bffffffffffffffffffffffff19828b0216040491869151602001526040517c010000000000000000000000000000000000000000000000000000000063ffffffff8616028152600481019390935271ffffffffffffffffffffffffffffffffffff9091166024830152604482015260640160206040518083038186803b15156104fa57600080fd5b6102c65a03f4151561050b57600080fd5b50505060405180519050507f873cb35202fef184c9f8ee23c04e36dc38f3e26fb285224ca574a837be976848838383604051600160a060020a039384168152919092166020820152604080820192909252606001905180910390a15b5050505050505600a165627a7a7230582014568d5bb54e1397ca6bd45f20f52b6bb6d5e8650bf49488e2f66e777e21c0470029`
+const DealsBin = `0x6060604052600a6000556000600255341561001957600080fd5b60405160208061070b833981016040528080519150505b60018054600160a060020a031916600160a060020a0383161790555b505b6106ae8061005d6000396000f3006060604052361561005c5763ffffffff60e060020a60003504166330e8e25d81146100615780635ad5f6ae146100865780635be20de2146100d95780638027b2dd146100f1578063ca6ad1bf14610127578063cdb0017514610134575b600080fd5b341561006c57600080fd5b61007461015b565b60405190815260200160405180910390f35b341561009157600080fd5b61009c600435610162565b604051948552600160a060020a039384166020860152919092166040808501919091526060840192909252608083015260a0909101905180910390f35b34156100e457600080fd5b6100ef6004356101c7565b005b34156100fc57600080fd5b610113600160a060020a03600435166024356102d9565b604051901515815260200160405180910390f35b6100ef600435610367565b005b341561013f57600080fd5b6100ef600160a060020a0360043516602435604435610525565b005b6002545b90565b6000818152600360208190526040822080546001820154600280840154948401546004850154879687968796879691959094600160a060020a0392831694939092169260ff16908111156101b257fe5b955095509550955095505b5091939590929450565b60008181526003602052604090206002015433600160a060020a039081169116146101f157600080fd5b600081815260036020819052604082206002810154925491015461022e92600160a060020a0316919081151561022357fe5b0462030d40026102d9565b151561023957600080fd5b600081815260036020526040902060040180546001919060ff191682805b02179055506000818152600360205260409081902060028101546001909101547f3a38edea6028913403c74ce8433c90eca94f4ca074d318d8cb77be5290ba4f1592600160a060020a039283169290911690849051600160a060020a039384168152919092166020820152604080820192909252606001905180910390a15b50565b60015460009081908390600160a060020a031663dd62ed3e8630856040516020015260405160e060020a63ffffffff8516028152600160a060020a03928316600482015291166024820152604401602060405180830381600087803b151561034057600080fd5b6102c65a03f1151561035157600080fd5b5050506040518051905003101590505b92915050565b60008181526003602052604081206004015460ff16905b81600281111561038a57fe5b14156103bf5760008281526003602052604090206002015433600160a060020a039081169116146103ba57600080fd5b610482565b60015b8160028111156103ce57fe5b1415610482576001805460008481526003602081905260408083209485015460028601549590920154600160a060020a03948516956323b872dd95938416949316929091516020015260405160e060020a63ffffffff8616028152600160a060020a0393841660048201529190921660248201526044810191909152606401602060405180830381600087803b151561046657600080fd5b6102c65a03f1151561047757600080fd5b505050604051805150505b5b600082815260036020526040902060040180546002919060ff19166001835b02179055506000828152600360205260409081902060028101546001909101547f72615f99a62a6cc2f8452d5c0c9cbc5683995297e1d988f09bb1471d4eefb89092600160a060020a039283169290911690859051600160a060020a039384168152919092166020820152604080820192909252606001905180910390a15b5050565b8233600061053382856102d9565b151561053e57600080fd5b50600280546001019081905560a06040519081016040908152868252600160a060020a038085166020840152851690820152606081018590526080810160005b9052600082815260036020526040902081518155602082015160018201805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0392909216919091179055604082015160028201805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a039290921691909117905560608201518160030155608082015160048201805460ff1916600183600281111561062157fe5b02179055509050507f873cb35202fef184c9f8ee23c04e36dc38f3e26fb285224ca574a837be976848838383604051600160a060020a039384168152919092166020820152604080820192909252606001905180910390a15b5050505050505600a165627a7a72305820a40eb36c36dd1bedd003a3182a75aee989f5f2affec2c823492810ea11fb56ef0029`
 
 // DeployDeals deploys a new Ethereum contract, binding an instance of Deals to it.
-func DeployDeals(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *Deals, error) {
+func DeployDeals(auth *bind.TransactOpts, backend bind.ContractBackend, _token common.Address) (common.Address, *types.Transaction, *Deals, error) {
 	parsed, err := abi.JSON(strings.NewReader(DealsABI))
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
-	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(DealsBin), backend)
+	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(DealsBin), backend, _token)
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
@@ -243,23 +243,44 @@ func (_Deals *DealsTransactorSession) GetDealInfo(dealIndex *big.Int) (*types.Tr
 	return _Deals.Contract.GetDealInfo(&_Deals.TransactOpts, dealIndex)
 }
 
-// OpenDeal is a paid mutator transaction binding the contract method 0xcdb00175.
+// IsPriceAllowed is a paid mutator transaction binding the contract method 0x8027b2dd.
 //
-// Solidity: function OpenDeal(_client address, _specHash uint256, _price uint256) returns()
-func (_Deals *DealsTransactor) OpenDeal(opts *bind.TransactOpts, _client common.Address, _specHash *big.Int, _price *big.Int) (*types.Transaction, error) {
-	return _Deals.contract.Transact(opts, "OpenDeal", _client, _specHash, _price)
+// Solidity: function IsPriceAllowed(addr address, _price uint256) returns(bool)
+func (_Deals *DealsTransactor) IsPriceAllowed(opts *bind.TransactOpts, addr common.Address, _price *big.Int) (*types.Transaction, error) {
+	return _Deals.contract.Transact(opts, "IsPriceAllowed", addr, _price)
+}
+
+// IsPriceAllowed is a paid mutator transaction binding the contract method 0x8027b2dd.
+//
+// Solidity: function IsPriceAllowed(addr address, _price uint256) returns(bool)
+func (_Deals *DealsSession) IsPriceAllowed(addr common.Address, _price *big.Int) (*types.Transaction, error) {
+	return _Deals.Contract.IsPriceAllowed(&_Deals.TransactOpts, addr, _price)
+}
+
+// IsPriceAllowed is a paid mutator transaction binding the contract method 0x8027b2dd.
+//
+// Solidity: function IsPriceAllowed(addr address, _price uint256) returns(bool)
+func (_Deals *DealsTransactorSession) IsPriceAllowed(addr common.Address, _price *big.Int) (*types.Transaction, error) {
+	return _Deals.Contract.IsPriceAllowed(&_Deals.TransactOpts, addr, _price)
 }
 
 // OpenDeal is a paid mutator transaction binding the contract method 0xcdb00175.
 //
-// Solidity: function OpenDeal(_client address, _specHash uint256, _price uint256) returns()
-func (_Deals *DealsSession) OpenDeal(_client common.Address, _specHash *big.Int, _price *big.Int) (*types.Transaction, error) {
-	return _Deals.Contract.OpenDeal(&_Deals.TransactOpts, _client, _specHash, _price)
+// Solidity: function OpenDeal(_hub address, _specHash uint256, _price uint256) returns()
+func (_Deals *DealsTransactor) OpenDeal(opts *bind.TransactOpts, _hub common.Address, _specHash *big.Int, _price *big.Int) (*types.Transaction, error) {
+	return _Deals.contract.Transact(opts, "OpenDeal", _hub, _specHash, _price)
 }
 
 // OpenDeal is a paid mutator transaction binding the contract method 0xcdb00175.
 //
-// Solidity: function OpenDeal(_client address, _specHash uint256, _price uint256) returns()
-func (_Deals *DealsTransactorSession) OpenDeal(_client common.Address, _specHash *big.Int, _price *big.Int) (*types.Transaction, error) {
-	return _Deals.Contract.OpenDeal(&_Deals.TransactOpts, _client, _specHash, _price)
+// Solidity: function OpenDeal(_hub address, _specHash uint256, _price uint256) returns()
+func (_Deals *DealsSession) OpenDeal(_hub common.Address, _specHash *big.Int, _price *big.Int) (*types.Transaction, error) {
+	return _Deals.Contract.OpenDeal(&_Deals.TransactOpts, _hub, _specHash, _price)
+}
+
+// OpenDeal is a paid mutator transaction binding the contract method 0xcdb00175.
+//
+// Solidity: function OpenDeal(_hub address, _specHash uint256, _price uint256) returns()
+func (_Deals *DealsTransactorSession) OpenDeal(_hub common.Address, _specHash *big.Int, _price *big.Int) (*types.Transaction, error) {
+	return _Deals.Contract.OpenDeal(&_Deals.TransactOpts, _hub, _specHash, _price)
 }

@@ -73,3 +73,4 @@ func main() {
 		dieSoon(err, "Failed to write ABI binding")
 	}
 }
+

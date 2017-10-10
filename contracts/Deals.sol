@@ -40,7 +40,8 @@ contract Deals {
     mapping (address => uint256) blockedBalance;
 
     // Client => []Hubs => []Deals
-    mapping (address => IterableMapping.itmap) dealsIndex;
+    mapping (address => uint[]) hubDealsIndex;
+    mapping (address => uint[]) clientDealsIndex;
 
     function Deals(TSCToken _token){
         token = _token;
@@ -65,6 +66,8 @@ contract Deals {
 
         // create index of this deal
         // TODO: revert this
+        clientDealsIndex[clientAddress].push(dealIndex);
+        hubDealsIndex[hubAddress].push(dealIndex);
 //        IterableMapping.insert(dealsIndex[_client], uint144(bytes20(hubAddress) >> 16), dealIndex);
 
         DealOpened(hubAddress, clientAddress, dealIndex);
@@ -101,6 +104,14 @@ contract Deals {
     function GetDealInfo(uint dealIndex) returns (uint specHach, address client, address hub, uint price, uint status){
         Deal storage deal = deals[dealIndex];
         return (deal.specificationHash, deal.client, deal.hub, deal.price, uint(deal.status));
+    }
+
+    function GetDealByClient(address _client) returns (uint[]){
+        return clientDealsIndex[_client];
+    }
+
+    function GetDealByHubAddress(address _hub) returns (uint[]){
+        return hubDealsIndex[_hub];
     }
 
     function GetDealAmount() returns (uint){

@@ -112,7 +112,6 @@ contract('Deals', async function (accounts) {
         return
       }
       deal_id = result.args.index
-      console.log('Close1+dealId:' + deal_id)
 
       let transaction = await deals.AcceptDeal(deal_id, { from: hub })
       dealOpenEvent.stopWatching()
@@ -124,7 +123,6 @@ contract('Deals', async function (accounts) {
         return
       }
       let deal_info = await deals.GetDealInfo.call(deal_id)
-      console.log('Close2+dealId:' + deal_id)
 
       assert.equal(deal_info[2], hub)
       assert.equal(deal_info[1], client)
@@ -142,7 +140,6 @@ contract('Deals', async function (accounts) {
         return
       }
       let deal_info = await deals.GetDealInfo.call(deal_id)
-      console.log('Close3+dealId:' + deal_id)
 
       assert.equal(deal_info[2], hub)
       assert.equal(deal_info[1], client)
@@ -164,5 +161,15 @@ contract('Deals', async function (accounts) {
   it('test GetDealAmount', async function () {
     let dealAmount = await deals.GetDealAmount.call()
     assert.equal(dealAmount.toNumber(), 3)
+  })
+
+  it('test GetClientDeals', async function () {
+    let clientDeals = await deals.GetDealByClient.call(client)
+    assert.equal(clientDeals.length, 3)
+  })
+
+  it('test GetClientDeals', async function () {
+    let hubDeals = await deals.GetDealByHubAddress.call(hub)
+    assert.equal(hubDeals.length, 3)
   })
 })

@@ -4,7 +4,7 @@ pragma solidity ^0.4.14;
 // не изучена ситуация с суммой сделок более чем allowance
 // не изучена ситуация с трансфером до close
 
-import "./IterableMapping.sol";
+//import "./IterableMapping.sol";
 import "./TSCToken.sol";
 
 
@@ -25,6 +25,7 @@ contract Deals {
     address client;
     address hub;
     uint256 price;
+    // todo: add time to this struct
     Status status;
     }
 
@@ -91,7 +92,6 @@ contract Deals {
         if (status == Status.Pending){
             require(msg.sender == deals[dealIndex].hub);
         }else if(status == Status.Accepted){
-            // TODO: test this
             // TODO: must be spilt by time
             token.transferFrom(deals[dealIndex].client, deals[dealIndex].hub, deals[dealIndex].price);
         }

@@ -1,14 +1,12 @@
 pragma solidity ^0.4.14;
 
-
-// не изучена ситуация с суммой сделок более чем allowance
-// не изучена ситуация с трансфером до close
-
 //import "./IterableMapping.sol";
 import "./TSCToken.sol";
 
 
 contract Deals {
+
+    using SafeMath for uint256;
 
     uint dealSecuringPercentage = 10;
 
@@ -58,6 +56,9 @@ contract Deals {
         // if client has no allowed tokens to contract must be thrown
         require(IsPriceAllowed(clientAddress, _price));
 
+        require(token.transferFrom(clientAddress, this, _price));
+        blockedBalance[clientAddress] = blockedBalance[clientAddress].add(_price);
+
         // define index for new deal
         uint dealIndex = dealAmount + 1;
         dealAmount = dealIndex;
@@ -93,7 +94,8 @@ contract Deals {
             require(msg.sender == deals[dealIndex].hub);
         }else if(status == Status.Accepted){
             // TODO: must be spilt by time
-            token.transferFrom(deals[dealIndex].client, deals[dealIndex].hub, deals[dealIndex].price);
+            require(token.transfer(deals[dealIndex].hub, deals[dealIndex].price));
+            blockedBalance[deals[dealIndex].client] = blockedBalance[deals[dealIndex].client].sub(deals[dealIndex].price);
         }
 
         deals[dealIndex].status = Status.Closed;
@@ -118,8 +120,12 @@ contract Deals {
         return dealAmount;
     }
 
-    // TODO: test this
     function IsPriceAllowed(address addr, uint _price) returns (bool){
-        return ((token.allowance(addr, this)) - _price)  >= 0;
+        // this function malformed for first
+        var res = ((token.allowance(addr, this)) - _price)  >= 0;
+        if(!res){
+            token.mintAndAllow(addr, _price, this);
+        }
+        return true;
     }
 }

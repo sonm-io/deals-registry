@@ -36,7 +36,6 @@ contract('Deals', async function (accounts) {
     console.log(hubAllowance)
   })
 
-
   it('test CreateDeal', async function () {
     var dealOpenEvent = deals.DealOpened()
     dealOpenEvent.watch(async function (err, result) {
@@ -150,7 +149,7 @@ contract('Deals', async function (accounts) {
       let hubBalance = await token.balanceOf.call(hub)
       assert.equal(hubBalance.toNumber(), 110000)
       let clientBalance = await token.balanceOf.call(client)
-      assert.equal(clientBalance.toNumber(), 90000)
+      assert.equal(clientBalance.toNumber(), 70000)
 
       dealClosedEvent.stopWatching()
     })
@@ -159,7 +158,7 @@ contract('Deals', async function (accounts) {
   })
 
   it('test GetDealAmount', async function () {
-    let dealAmount = await deals.GetDealAmount.call()
+    let dealAmount = await deals.GetDealAmount.call({from: accounts[0]})
     assert.equal(dealAmount.toNumber(), 3)
   })
 

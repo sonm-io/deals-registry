@@ -78,7 +78,7 @@ contract Deals {
         require(msg.sender == deals[dealIndex].hub);
 
         // if hub has no allowed tokens to securingDeal must be thrown
-        require(IsPriceAllowed(deals[dealIndex].hub, (deals[dealIndex].price / dealSecuringPercentage * 200000)));
+        require(IsPriceAllowed(deals[dealIndex].hub, (deals[dealIndex].price / dealSecuringPercentage )));
 
         deals[dealIndex].status = Status.Accepted;
 

@@ -103,20 +103,20 @@ contract Deals {
         DealClosed(deals[dealIndex].hub, deals[dealIndex].client, dealIndex);
     }
 
-    function GetDealInfo(uint dealIndex) returns (uint specHach, address client, address hub, uint price, uint status){
+    function GetDealInfo(uint dealIndex) constant returns (uint specHach, address client, address hub, uint price, uint status){
         Deal storage deal = deals[dealIndex];
         return (deal.specificationHash, deal.client, deal.hub, deal.price, uint(deal.status));
     }
 
-    function GetDealByClient(address _client) returns (uint[]){
+    function GetDealByClient(address _client) constant returns (uint[]){
         return clientDealsIndex[_client];
     }
 
-    function GetDealByHubAddress(address _hub) returns (uint[]){
+    function GetDealByHubAddress(address _hub) constant returns (uint[]){
         return hubDealsIndex[_hub];
     }
 
-    function GetDealAmount() returns (uint){
+    function GetDealAmount() constant returns (uint){
         return dealAmount;
     }
 

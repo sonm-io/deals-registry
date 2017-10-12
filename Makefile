@@ -19,4 +19,3 @@ test_ci: node_morules testrpc test
 
 deploy:
 	cp -R build deployed
-	${GO}

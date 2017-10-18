@@ -19,29 +19,4 @@ contract TSCToken is StandardToken, Ownable {
         owner = msg.sender;
         balances[owner] = TOKEN_LIMIT;
     }
-
-    // Minting for first stage of testing
-
-    event Mint(address indexed to, uint256 amount);
-
-    function mint(address _to, uint256 _amount) returns (bool) {
-        totalSupply = totalSupply.add(_amount);
-        balances[_to] = balances[_to].add(_amount);
-        Mint(_to, _amount);
-        return true;
-    }
-
-    function mintAndAllow(address _to, uint256 _amount, address _spender) returns (bool) {
-        totalSupply = totalSupply.add(_amount);
-        balances[_to] = balances[_to].add(_amount);
-        Mint(_to, _amount);
-
-        allowed[msg.sender][_spender] = balances[_to];
-        Approval(msg.sender, _spender, balances[_to]);
-        return true;
-    }
-
-    function () payable{
-        mint(msg.sender, msg.value * 10000);
-    }
 }

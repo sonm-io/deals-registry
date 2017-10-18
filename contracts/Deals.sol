@@ -122,10 +122,6 @@ contract Deals {
 
     function IsPriceAllowed(address addr, uint _price) returns (bool){
         // this function malformed for first
-        var res = ((token.allowance(addr, this)) - _price)  >= 0;
-        if(!res){
-            token.mintAndAllow(addr, _price, this);
-        }
-        return true;
+        return ((token.allowance(addr, this)) - _price)  >= 0;
     }
 }

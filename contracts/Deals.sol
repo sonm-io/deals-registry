@@ -1,6 +1,6 @@
 pragma solidity ^0.4.14;
 
-//import "./IterableMapping.sol";
+
 import "./TSCToken.sol";
 
 
@@ -23,105 +23,113 @@ contract Deals {
     address client;
     address hub;
     uint256 price;
-    // todo: add time to this struct
+    uint startTime;
+    uint workTime;
+    uint endTime;
     Status status;
     }
 
     event DealOpened(address hub, address client, uint index);
+
     event DealAccepted(address hub, address client, uint index);
+
     event DealClosed(address hub, address client, uint index);
 
     uint dealAmount = 0;
 
     mapping (uint => Deal) deals;
 
-    // TODO: must implement this
-    mapping (address => uint256) blockedBalance;
+    mapping (uint => uint256) blockedBalance;
 
-    // Client => []Hubs => []Deals
     mapping (address => uint[]) hubDealsIndex;
+
     mapping (address => uint[]) clientDealsIndex;
 
     function Deals(TSCToken _token){
         token = _token;
     }
 
-    // OpenDeal opening new deal
-    // may to calling from everyone
-    function OpenDeal(address _hub, uint256 _specHash, uint256 _price){
-        // setting own parameters
-        address hubAddress = _hub;
-        address clientAddress = msg.sender;
+    function OpenDeal(address _hub, address _client, uint256 _specHash, uint256 _price, uint _workTime){
+        require(msg.sender == _client);
 
-        // if client has no allowed tokens to contract must be thrown
-        require(IsPriceAllowed(clientAddress, _price));
+        uint id = dealAmount + 1;
+        dealAmount = id;
 
-        require(token.transferFrom(clientAddress, this, _price));
-        blockedBalance[clientAddress] = blockedBalance[clientAddress].add(_price);
+        deals[id] = Deal(_specHash, _client, _hub, _price, 0, _workTime, 0, Status.Pending);
 
-        // define index for new deal
-        uint dealIndex = dealAmount + 1;
-        dealAmount = dealIndex;
+        require(token.transferFrom(_client, this, _price));
+        blockedBalance[id] = blockedBalance[id].add(_price);
 
-        // create new deal
-        deals[dealIndex] = Deal(_specHash, clientAddress, hubAddress, _price, Status.Pending);
+        clientDealsIndex[_client].push(id);
+        hubDealsIndex[_hub].push(id);
 
-        // create index of this deal
-        // TODO: revert this
-        clientDealsIndex[clientAddress].push(dealIndex);
-        hubDealsIndex[hubAddress].push(dealIndex);
-//        IterableMapping.insert(dealsIndex[_client], uint144(bytes20(hubAddress) >> 16), dealIndex);
-
-        DealOpened(hubAddress, clientAddress, dealIndex);
+        DealOpened(_hub, _client, id);
     }
 
-    function AcceptDeal(uint dealIndex) {
-        require(msg.sender == deals[dealIndex].hub);
+    function AcceptDeal(uint id) {
+        require(msg.sender == deals[id].hub);
+        require(deals[id].status == Status.Pending);
 
-        // if hub has no allowed tokens to securingDeal must be thrown
-        require(IsPriceAllowed(deals[dealIndex].hub, (deals[dealIndex].price / dealSecuringPercentage )));
+        deals[id].status = Status.Accepted;
+        deals[id].startTime = now;
+        deals[id].endTime = now + deals[id].workTime;
 
-        deals[dealIndex].status = Status.Accepted;
-
-        DealAccepted(deals[dealIndex].hub, deals[dealIndex].client, dealIndex);
+        DealAccepted(deals[id].hub, deals[id].client, id);
     }
 
-    function CloseDeal(uint dealIndex) payable {
-        var status = deals[dealIndex].status;
+    function CloseDeal(uint id) {
+        require(msg.sender == deals[id].client);
+        require(deals[id].status == Status.Accepted);
 
-        // Its must be involve to revoke deal though CloseDeal
-        if (status == Status.Pending){
-            require(msg.sender == deals[dealIndex].hub);
-        }else if(status == Status.Accepted){
-            // TODO: must be spilt by time
-            require(token.transfer(deals[dealIndex].hub, deals[dealIndex].price));
-            blockedBalance[deals[dealIndex].client] = blockedBalance[deals[dealIndex].client].sub(deals[dealIndex].price);
+        if (now > deals[id].endTime){
+            require(token.transfer(deals[id].hub, deals[id].price));
+            blockedBalance[id] = blockedBalance[id].sub(deals[id].price);
+        }else{
+            var paidAmount = (now - deals[id].startTime) * (deals[id].price / deals[id].workTime);
+
+            require(token.transfer(deals[id].hub, paidAmount));
+            blockedBalance[id] = blockedBalance[id].sub(paidAmount);
+            require(token.transfer(deals[id].client, deals[id].price - paidAmount));
+            blockedBalance[id] = blockedBalance[id].sub(deals[id].price - paidAmount);
+            deals[id].endTime = now;
         }
 
-        deals[dealIndex].status = Status.Closed;
+        deals[id].status = Status.Closed;
 
-        DealClosed(deals[dealIndex].hub, deals[dealIndex].client, dealIndex);
+        DealClosed(deals[id].hub, deals[id].client, id);
     }
 
-    function GetDealInfo(uint dealIndex) constant returns (uint specHach, address client, address hub, uint price, uint status){
+    function CancelDeal(uint id){
+        require(msg.sender == deals[id].client);
+        require(deals[id].status == Status.Pending);
+
+        require(token.transfer(deals[id].client, deals[id].price));
+        blockedBalance[id] = blockedBalance[id].sub(deals[id].price);
+
+        deals[id].status = Status.Closed;
+
+        DealClosed(deals[id].hub, deals[id].client, id);
+    }
+
+    function GetDealInfo(uint dealIndex) constant returns (uint specHach, address client, address hub, uint price, uint startTime, uint workTime, uint endTIme, uint status){
         Deal storage deal = deals[dealIndex];
-        return (deal.specificationHash, deal.client, deal.hub, deal.price, uint(deal.status));
+        return (deal.specificationHash, deal.client, deal.hub, deal.price, deal.startTime, deal.workTime, deal.endTime, uint(deal.status));
     }
 
-    function GetDealByClient(address _client) constant returns (uint[]){
+    function GetDealsByClient(address _client) constant returns (uint[]){
         return clientDealsIndex[_client];
     }
 
-    function GetDealByHubAddress(address _hub) constant returns (uint[]){
+    function GetDealsByHubAddress(address _hub) constant returns (uint[]){
         return hubDealsIndex[_hub];
     }
 
-    function GetDealAmount() constant returns (uint){
+    function GetDealsAmount() constant returns (uint){
         return dealAmount;
     }
 
     function IsPriceAllowed(address addr, uint _price) returns (bool){
         // this function malformed for first
-        return ((token.allowance(addr, this)) - _price)  >= 0;
+        return ((token.allowance(addr, this)) - _price) >= 0;
     }
 }

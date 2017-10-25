@@ -10,7 +10,7 @@ import tokenArtifact from '../../build/contracts/TSCToken.json'
 import dealsArtifact from '../../build/contracts/Deals.json'
 
 // MetaCoin is our usable abstraction, which we'll use through the code below.
-var MetaCoin = contract(tokenArtifact)
+var Token = contract(tokenArtifact)
 var Deals = contract(dealsArtifact)
 
 // The following code is simple to show off interacting with your contracts.
@@ -18,6 +18,12 @@ var Deals = contract(dealsArtifact)
 // For application bootstrapping, check out window.addEventListener below.
 var accounts
 var account
+
+var client
+var hub
+
+var token
+var deals
 
 window.addEventListener('load', function () {
   // Checking if Web3 has been injected by the browser (Mist/MetaMask)
@@ -43,13 +49,17 @@ window.addEventListener('load', function () {
   window.App.start()
 })
 
+var test_spec = 2341234
+var test_price = 60
+var test_workTime = 60
+
 window.App = {
-  start: function () {
+  start: async function () {
     var web3 = window.web3
     var self = this
 
     // Bootstrap the MetaCoin abstraction for Use.
-    MetaCoin.setProvider(web3.currentProvider)
+    Token.setProvider(web3.currentProvider)
     Deals.setProvider(web3.currentProvider)
 
     // Get the initial account balance so it can be displayed.
@@ -62,39 +72,36 @@ window.App = {
 
     accounts = accs
     account = accounts[0]
+    client = accounts[1]
+    hub = accounts[2]
 
-    var addr = document.getElementById('acc-address')
-    addr.innerHTML = account.toString()
-    self.refreshBalance()
-    self.loadDealsCount()
+    token = await Token.deployed()
+    deals = await Deals.deployed()
+
+    self.syncView()
+  },
+
+  watch: function () {
+    var event = token.Transfer()
+    event.watch(function (err, result) {
+      console.log(result)
+    })
+  },
+
+  syncView: function () {
+    this.loadDealsCount()
+    this.loadCoinbaseBalance()
+    this.loadClientBalance()
+    this.loadHubBalance()
+    this.loadDealsBalance()
+    this.loadDeals()
   },
 
   loadDealsCount: function () {
     Deals.deployed().then(function (deals) {
-      return deals.GetDealAmount.call()
+      return deals.GetDealsAmount.call()
     }).then(function (result) {
       console.log(result.toString())
-    })
-  },
-
-  setStatus: function (message) {
-    var status = document.getElementById('status')
-    status.innerHTML = message
-  },
-
-  refreshBalance: function () {
-    var self = this
-
-    var meta
-    MetaCoin.deployed().then(function (instance) {
-      meta = instance
-      return meta.balanceOf.call(account, { from: account })
-    }).then(function (value) {
-      let balanceElement = document.getElementById('balance')
-      balanceElement.innerHTML = value.valueOf().toString()
-    }).catch(function (e) {
-      console.log(e)
-      self.setStatus('Error getting balance; see log.')
     })
   },
 
@@ -107,7 +114,7 @@ window.App = {
     this.setStatus('Initiating transaction... (please wait)')
 
     var meta
-    MetaCoin.deployed().then(function (instance) {
+    Token.deployed().then(function (instance) {
       meta = instance
       return meta.sendCoin(receiver, amount, {from: account})
     }).then(function () {
@@ -117,5 +124,119 @@ window.App = {
       console.log(e)
       self.setStatus('Error sending coin; see log.')
     })
+  },
+
+  sendToHub: async function () {
+    var self = this
+
+    await token.transfer(hub, 10000,  {from: account})
+    await self.loadHubBalance()
+    await self.loadCoinbaseBalance()
+  },
+
+  sendToClient: async function () {
+    var self = this
+
+    await token.transfer(client, 10000,  {from: account})
+    await self.loadClientBalance()
+    await self.loadCoinbaseBalance()
+  },
+
+  allowFromHub: async function () {
+    var self = this
+
+    await token.approve(deals.address, 10000,  {from: hub})
+    await self.loadHubBalance()
+    await self.loadCoinbaseBalance()
+  },
+
+  allowFromClient: async function () {
+    var self = this
+
+    await token.approve(deals.address, 20000,  {from: client})
+    await self.loadClientBalance()
+    await self.loadCoinbaseBalance()
+  },
+
+  loadCoinbaseBalance: async function () {
+    var self = this
+
+    let coinbaseBalance = await token.balanceOf(account)
+    $('#coinbase-balance').html(coinbaseBalance.toString())
+  },
+
+  loadClientBalance: async function () {
+    var self = this
+
+    let clientBalance = await token.balanceOf(client)
+    $('#client-balance').html(clientBalance.toString())
+    let clientAllowance = await token.allowance(client, deals.address)
+    $('#client-allowance').html(clientAllowance.toString())
+  },
+
+  loadHubBalance: async function () {
+    var self = this
+
+    let hubBalance = await token.balanceOf(hub)
+    $('#hub-balance').html(hubBalance.toString())
+    let hubAllowance = await token.allowance(hub, deals.address)
+    $('#hub-allowance').html(hubAllowance.toString())
+  },
+
+  loadDealsBalance: async function () {
+    var self = this
+
+    let dealsBalance = await token.balanceOf(deals.address)
+    $('#deals-balance').html(dealsBalance.toString())
+  },
+
+  loadDeals: async function(){
+    var self = this
+
+    var clientDeals = await deals.GetDealsByClient(client)
+
+    var html = ""
+
+    for(var i = 0; i < clientDeals.length; i++){
+      // console.log(clientDeals[i])
+      var deal_id = clientDeals[i].toNumber()
+      var deal = await deals.GetDealInfo(deal_id)
+      console.log(deal)
+      html += "<tr><td>"+deal_id+"</td><td>"+deal[3]+"</td><td>"+deal[4]+"</td><td>"+deal[5]+"</td><td>"+deal[6]+"</td><td>"+deal[7]+"</td></tr>"
+    }
+    $('#deals-table').html(html)
+  },
+
+  OpenDeal: async function (){
+    await deals.OpenDeal(hub, client, test_spec, test_price, test_workTime, {from: client, gas: 302000 })
+
+    this.syncView()
+  },
+
+  AcceptDeal: async function(){
+    let id = $("#dealId").val()
+
+    await deals.AcceptDeal(id, {from: hub, gas: 90000})
+
+    this.syncView()
+  },
+
+  CloseDeal: async function() {
+    let id = $("#dealId").val()
+
+    await deals.CloseDeal(id, {from: client, gas: 200000})
+
+    this.syncView()
+  },
+
+  CancelDeal: async function(){
+    let id = $("#dealId").val()
+
+    await deals.CancelDeal(id, {from: client, gas: 80000})
+
+    this.syncView()
   }
+
+
+
 }

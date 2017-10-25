@@ -7,3 +7,4 @@ migrations/2_deploy_contracts.js
 migrations/3_deploy_deals.js
 test/metacoin.js
 test/deals.js
+app/

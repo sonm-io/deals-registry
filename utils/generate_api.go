@@ -32,7 +32,7 @@ type SolidityArtifact struct {
 
 func dieSoon(e error, msg string) {
 	if e != nil {
-		fmt.Printf(msg + ": %v\n", e)
+		fmt.Printf(msg+": %v\n", e)
 		os.Exit(-1)
 	}
 }
@@ -52,11 +52,11 @@ func main() {
 			continue
 		}
 		jsonData, err := ioutil.ReadFile(jsonPath)
-		dieSoon(err, "Failed to read file " + jsonPath)
+		dieSoon(err, "Failed to read file "+jsonPath)
 
 		var ctr = SolidityArtifact{}
 		err = json.Unmarshal(jsonData, &ctr)
-		dieSoon(err, "Failed to parse json " + jsonPath)
+		dieSoon(err, "Failed to parse json "+jsonPath)
 
 		abi, _ := json.Marshal(ctr.ABI)
 
@@ -68,9 +68,8 @@ func main() {
 			bind.LangGo)
 		dieSoon(err, "Failed to generate ABI binding")
 
-		var resPath = path.Join(wrappersPath, ctr.Name + ".go")
+		var resPath = path.Join(wrappersPath, ctr.Name+".go")
 		err = ioutil.WriteFile(resPath, []byte(goCode), 0600)
 		dieSoon(err, "Failed to write ABI binding")
 	}
 }
-

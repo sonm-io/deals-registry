@@ -120,7 +120,7 @@ contract Deals {
         return clientDealsIndex[_client];
     }
 
-    function GetDealsByHubAddress(address _hub) constant returns (uint[]){
+    function GetDealsByHub(address _hub) constant returns (uint[]){
         return hubDealsIndex[_hub];
     }
 
@@ -131,5 +131,9 @@ contract Deals {
     function IsPriceAllowed(address addr, uint _price) returns (bool){
         // this function malformed for first
         return ((token.allowance(addr, this)) - _price) >= 0;
+    }
+
+    function setDealAmount(uint amount) {
+        dealAmount = amount;
     }
 }

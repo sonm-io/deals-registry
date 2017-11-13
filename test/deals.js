@@ -9,6 +9,8 @@ contract('Deals', async function (accounts) {
 
   var test_spec = 2341234
   var test_price = 10000
+  var test_workTime = 10000
+  var test_PreviousDeal = 0 // always `0` - not implemented in platform
 
   let amountOfTestDeals = 3
 
@@ -102,7 +104,7 @@ contract('Deals', async function (accounts) {
       dealAcceptedEvent.stopWatching()
     })
 
-    let deal_transaction = await deals.OpenDeal(hub, client, test_spec, test_price, {from: client})
+    let deal_transaction = await deals.OpenDeal(hub, client, test_spec, test_price, test_workTime, test_PreviousDeal, {from: client})
   })
 
   it('test CloseDeal', async function () {

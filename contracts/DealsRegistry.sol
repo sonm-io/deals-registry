@@ -21,6 +21,12 @@ contract DealsRegistry {
     function Migrate(address newContract) {
         var amount = Deals(this.GetLastVersion()).GetDealsAmount();
         Deals(newContract).setDealAmount(amount);
-        dealsContract.push[newContract];
+        dealsContracts.push(newContract);
+    }
+
+    function GetAllDeals(){
+
     }
 }
+
+

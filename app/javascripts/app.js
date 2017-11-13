@@ -193,7 +193,7 @@ window.App = {
   loadDeals: async function(){
     var self = this
 
-    var clientDeals = await deals.GetDealsByClient(client)
+    var clientDeals = await deals.GetDeals(client)
 
     var html = ""
 
@@ -208,7 +208,7 @@ window.App = {
   },
 
   OpenDeal: async function (){
-    await deals.OpenDeal(hub, client, test_spec, test_price, test_workTime, {from: client, gas: 302000 })
+    await deals.OpenDeal(hub, client, test_spec, test_price, test_workTime, 0, {from: client, gas: 302000 })
 
     this.syncView()
   },
@@ -235,8 +235,11 @@ window.App = {
     await deals.CancelDeal(id, {from: client, gas: 80000})
 
     this.syncView()
+  },
+
+  LogAllEvents: async function(){
+    token.allEvents(function(err, log){
+      console.log(log)
+    });
   }
-
-
-
 }

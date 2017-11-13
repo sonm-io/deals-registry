@@ -1,4 +1,4 @@
 package tsc
 
-const TSCAddress string = "0xf0bc3a6afaf7749a2983692f0cb634a96e2e6c1e"
-const DealsAddress string = "0x7ca4d552fc464912a4dd05112037a384c13072b7"
+const TSCAddress string = "0x205e793dfd45183fd6b0321277d0aaf1a028928a"
+const DealsAddress string = "0x5eeee8e6da8781504d20f58a9945cc02170c2b36"

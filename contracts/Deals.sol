@@ -10,11 +10,9 @@ contract Deals {
 
     TSCToken token;
 
-    enum Status{
-    Pending,
-    Accepted,
-    Closed
-    }
+    uint constant STATUS_PENDING = 1;
+    uint constant STATUS_ACCEPTED = 2;
+    uint constant STATUS_CLOSED = 3;
 
     struct Deal {
     uint256 specificationHash;
@@ -24,7 +22,7 @@ contract Deals {
     uint startTime;
     uint workTime;
     uint endTime;
-    Status status;
+    uint status;
     }
 
     event DealOpened(address hub, address client, uint index);
@@ -53,7 +51,7 @@ contract Deals {
         // startTime - 0, setting in AcceptDeal()
         // workTime - in seconds
         // endTime - 0, setting in AcceptDeal()
-        deals[dealAmount] = Deal(_specHash, _client, _hub, _price, 0, _workTime, 0, Status.Pending);
+        deals[dealAmount] = Deal(_specHash, _client, _hub, _price, 0, _workTime, 0, STATUS_PENDING);
 
         require(token.transferFrom(_client, this, _price));
         blockedBalance[dealAmount] = blockedBalance[dealAmount].add(_price);
@@ -65,9 +63,9 @@ contract Deals {
 
     function AcceptDeal(uint id) {
         require(msg.sender == deals[id].hub);
-        require(deals[id].status == Status.Pending);
+        require(deals[id].status == STATUS_PENDING);
 
-        deals[id].status = Status.Accepted;
+        deals[id].status = STATUS_ACCEPTED;
         deals[id].startTime = now;
         deals[id].endTime = now + deals[id].workTime;
 
@@ -75,14 +73,14 @@ contract Deals {
     }
 
     function CloseDeal(uint id) {
-        require(msg.sender == deals[id].client);
-        if (deals[id].status == Status.Accepted) {
+        if (deals[id].status == STATUS_ACCEPTED) {
             // Closing deal
             if (now > deals[id].endTime) {
                 // After endTime
                 require(token.transfer(deals[id].hub, deals[id].price));
                 blockedBalance[id] = blockedBalance[id].sub(deals[id].price);
             } else {
+                require(msg.sender == deals[id].client);
                 // Before endTime
                 var paidAmount = (now - deals[id].startTime) * (deals[id].price / deals[id].workTime);
                 require(token.transfer(deals[id].hub, paidAmount));
@@ -91,14 +89,15 @@ contract Deals {
                 blockedBalance[id] = blockedBalance[id].sub(deals[id].price - paidAmount);
                 deals[id].endTime = now;
             }
-            deals[id].status = Status.Closed;
+            deals[id].status = STATUS_CLOSED;
             DealClosed(deals[id].hub, deals[id].client, id);
-        }else if (deals[id].status == Status.Pending) {
+        }else if (deals[id].status == STATUS_PENDING) {
+            require(msg.sender == deals[id].client);
             // Canceling deal
             require(token.transfer(deals[id].client, deals[id].price));
             blockedBalance[id] = blockedBalance[id].sub(deals[id].price);
 
-            deals[id].status = Status.Closed;
+            deals[id].status = STATUS_CLOSED;
 
             DealClosed(deals[id].hub, deals[id].client, id);
         } else {
@@ -108,7 +107,7 @@ contract Deals {
 
     function GetDealInfo(uint dealIndex) constant returns (uint specHach, address client, address hub, uint price, uint startTime, uint workTime, uint endTIme, uint status){
         Deal storage deal = deals[dealIndex];
-        return (deal.specificationHash, deal.client, deal.hub, deal.price, deal.startTime, deal.workTime, deal.endTime, uint(deal.status));
+        return (deal.specificationHash, deal.client, deal.hub, deal.price, deal.startTime, deal.workTime, deal.endTime, deal.status);
     }
 
     function GetDeals(address addr) constant returns (uint[]){

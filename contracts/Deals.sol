@@ -25,11 +25,11 @@ contract Deals {
     uint status;
     }
 
-    event DealOpened(address hub, address client, uint index);
+    event DealOpened(address indexed hub, address indexed client, uint id);
 
-    event DealAccepted(address hub, address client, uint index);
+    event DealAccepted(address indexed hub, address indexed client, uint id);
 
-    event DealClosed(address hub, address client, uint index);
+    event DealClosed(address indexed hub, address indexed client, uint id);
 
     uint dealAmount = 0;
 

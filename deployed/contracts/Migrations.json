@@ -64,58 +64,10 @@
     "4": {
       "events": {},
       "links": {},
-      "address": "0x33453ac12a1624f33b9e602c0a36c5f0bca74a43",
-      "updated_at": 1511464771635
-    },
-    "1508632262321": {
-      "events": {},
-      "links": {},
-      "address": "0xcff29f2dd487e075be9b5ad4b9bb10d1a0b24643",
-      "updated_at": 1508634286657
-    },
-    "1508925575207": {
-      "events": {},
-      "links": {},
-      "address": "0xa48860c84fa20e85b3e501013e4472d5c9713ee4",
-      "updated_at": 1508929388634
-    },
-    "1508937103502": {
-      "events": {},
-      "links": {},
-      "address": "0x78813bd094d328156a1011f690e0a1e73486164e",
-      "updated_at": 1508939468080
-    },
-    "1509139311430": {
-      "events": {},
-      "links": {},
-      "address": "0x62a9a12ae53ab803d53acba15ccc00a1e1dabda2",
-      "updated_at": 1509221264997
-    },
-    "1509453143140": {
-      "events": {},
-      "links": {},
-      "address": "0x16375e9f5db8cc04d35c0309848373396d572256",
-      "updated_at": 1509454649818
-    },
-    "1510577931954": {
-      "events": {},
-      "links": {},
-      "address": "0xa5e3dd0175604305de6b8e24e1d928ef6541a844",
-      "updated_at": 1510578398586
-    },
-    "1511177635991": {
-      "events": {},
-      "links": {},
-      "address": "0x3624a0584bbac4b7e82530a6b311abfadc847ab9",
-      "updated_at": 1511177683680
-    },
-    "1511348629922": {
-      "events": {},
-      "links": {},
-      "address": "0xa610239ea056f344eb26e8957fbda65bc58f9444",
-      "updated_at": 1511348647089
+      "address": "0x4ce4ba7ed9d4be581260974efd07c7bffcb34cea",
+      "updated_at": 1511782472818
     }
   },
   "schema_version": "0.0.5",
-  "updated_at": 1511464771635
+  "updated_at": 1511782472818
 }

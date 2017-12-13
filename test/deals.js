@@ -12,7 +12,7 @@ contract('Deals', async function (accounts) {
   var test_workTime = 10000
   var test_PreviousDeal = 0 // always `0` - not implemented in platform
 
-  let amountOfTestDeals = 3
+  let amountOfTestDeals = 2
 
   before(async function () {
     token = await TSC.deployed()
@@ -48,7 +48,7 @@ contract('Deals', async function (accounts) {
         return
       }
 
-      let deal_id = result.args.index
+      let deal_id = result.args.id
       let deal_info = await deals.GetDealInfo.call(deal_id)
 
       assert.equal(deal_info[2], hub)
@@ -60,7 +60,7 @@ contract('Deals', async function (accounts) {
       dealOpenEvent.stopWatching()
     })
 
-    let deal_transaction = await deals.OpenDeal(hub, client, test_spec, test_price, {from: client})
+    let deal_transaction = await deals.OpenDeal(hub, client, test_spec, test_price, test_workTime, {from: client})
 
     let dealAmount = await deals.GetDealsAmount.call()
     assert.equal(dealAmount, 1)
@@ -77,7 +77,7 @@ contract('Deals', async function (accounts) {
         return
       }
 
-      deal_id = result.args.index
+      deal_id = result.args.id
 
       let transaction = await deals.AcceptDeal(deal_id, {from: hub})
       dealOpenEvent.stopWatching()
@@ -90,7 +90,7 @@ contract('Deals', async function (accounts) {
       }
 
       let balanceOfClient = await token.balanceOf(client)
-      let clientDeals = await deals.GetDealsByClient(client)
+      let clientDeals = await deals.GetDeals(client)
       assert.equal(balanceOfClient, 100000 - test_price * clientDeals.length)
 
       let deal_info = await deals.GetDealInfo.call(deal_id)
@@ -99,48 +99,15 @@ contract('Deals', async function (accounts) {
       assert.equal(deal_info[1], client)
       assert.equal(deal_info[0].toNumber(), test_spec)
       assert.equal(deal_info[3].toNumber(), test_price)
-      assert.equal(deal_info[4].toNumber(), 1)
+      assert.equal(deal_info[5].toNumber(), 1)
 
       dealAcceptedEvent.stopWatching()
     })
 
-    let deal_transaction = await deals.OpenDeal(hub, client, test_spec, test_price, test_workTime, test_PreviousDeal, {from: client})
+    let deal_transaction = await deals.OpenDeal(hub, client, test_spec, test_price, test_workTime, {from: client})
   })
 
-  it('test CloseDeal', async function () {
-    // var dealOpenEvent = deals.DealOpened()
-    // var dealAcceptedEvent = deals.DealAccepted()
-    var dealClosedEvent = deals.DealClosed()
-    var deal_id
-
-    dealClosedEvent.watch(async function (err, result) {
-      if (err) {
-        console.log(err)
-        return
-      }
-      deal_id = result.args.index
-      let deal_info = await deals.GetDealInfo.call(deal_id)
-
-      assert.equal(deal_info[2], hub)
-      assert.equal(deal_info[1], client)
-      assert.equal(deal_info[0].toNumber(), test_spec)
-      assert.equal(deal_info[3].toNumber(), test_price)
-      assert.equal(deal_info[4].toNumber(), 2)
-
-      let hubBalance = await token.balanceOf.call(hub)
-      assert.equal(hubBalance.toNumber(), 110000)
-      let clientBalance = await token.balanceOf.call(client)
-      assert.equal(clientBalance.toNumber(), 70000)
-
-      dealClosedEvent.stopWatching()
-    })
-
-    await deals.OpenDeal(hub, client, test_spec, test_price, { from: client })
-    console.log(await deals.GetDealsByClient.call(client))
-    // await deals.AcceptDeal(3, { from: hub })
-    await deals.CloseDeal(3, { from: client })
-
-  })
+  it('test CloseDeal')
 
   it('test CancelDeal')
 
@@ -150,12 +117,9 @@ contract('Deals', async function (accounts) {
   })
 
   it('test GetClientDeals', async function () {
-    let clientDeals = await deals.GetDealsByClient.call(client)
+    let clientDeals = await deals.GetDeals.call(client)
     assert.equal(clientDeals.length, amountOfTestDeals)
   })
 
-  it('test GetHubDeals', async function () {
-    let hubDeals = await deals.GetDealsByHubAddress.call(hub)
-    assert.equal(hubDeals.length, amountOfTestDeals)
-  })
+  it('test GetHubDeals')
 })

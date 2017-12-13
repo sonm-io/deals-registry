@@ -1,0 +1,19 @@
+dist: trusty
+sudo: "required"
+
+language: "node_js"
+
+node_js:
+    - "8"
+
+services:
+    - "docker"
+
+before_install:
+  - npm i -g npm@5
+
+install:
+  - npm install
+
+script:
+    - make migrate

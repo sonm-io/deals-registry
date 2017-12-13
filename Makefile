@@ -19,3 +19,9 @@ test_ci: node_morules testrpc test
 
 deploy:
 	cp -R build deployed
+
+reset:
+	${TRUFFLE} migrate --reset
+
+compile:
+	${TRUFFLE} compile

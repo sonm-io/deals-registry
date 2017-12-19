@@ -1,14 +1,14 @@
 pragma solidity ^0.4.15;
 
 
-import "./TSCToken.sol";
+import "./SNMTToken.sol";
 
 
 contract Deals {
 
     using SafeMath for uint256;
 
-    TSCToken token;
+    SNMTToken token;
 
     uint constant STATUS_PENDING = 1;
     uint constant STATUS_ACCEPTED = 2;
@@ -39,7 +39,7 @@ contract Deals {
 
     mapping (address => uint[]) dealsIndex;
 
-    function Deals(TSCToken _token){
+    function Deals(SNMTToken _token){
         token = _token;
     }
 

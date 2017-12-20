@@ -12,11 +12,28 @@ contract SNMTToken is StandardToken, Ownable {
 
     uint public decimals = 18;
 
-    uint constant TOKEN_LIMIT = 444 * 10e6 * 10e18;
+    event GiveAway(address whom, uint amount);
 
     function SNMTToken(){
-        totalSupply = TOKEN_LIMIT;
         owner = msg.sender;
-        balances[owner] = TOKEN_LIMIT;
+    }
+
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public returns (bool){
+        balances[target].add(mintedAmount);
+        totalSupply.add(mintedAmount);
+        GiveAway(target, mintedAmount);
+    }
+
+    // @dev Gives the sender 100 SNMT's,
+    function getTokens() public returns (bool){
+      uint256 value = 100 * 10e18;
+      balances[msg.sender] = balances[msg.sender].add(value);
+      totalSupply.add(value);
+      GiveAway(msg.sender, value);
+      return true;
+    }
+
+    function () payable {
+      getTokens();
     }
 }

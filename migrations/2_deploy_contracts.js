@@ -1,5 +1,5 @@
-var tsc_token = artifacts.require("./TSCToken.sol");
+var SNMT_token = artifacts.require("./SNMTToken.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(tsc_token);
+  deployer.deploy(SNMT_token);
 };

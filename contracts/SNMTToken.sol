@@ -27,7 +27,7 @@ contract SNMTToken is StandardToken, Ownable {
 
     // @dev Gives the sender 100 SNMT's,
     function getTokens() public returns (bool){
-        uint256 value = 100 * (10 ** decimals);
+        uint256 value = 100 * 1e18;
         balances[msg.sender] = balances[msg.sender].add(value);
         totalSupply = totalSupply.add(value);
         GiveAway(msg.sender, value);

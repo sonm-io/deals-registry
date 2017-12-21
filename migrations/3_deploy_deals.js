@@ -1,6 +1,6 @@
-var tsc_token = artifacts.require("./TSCToken.sol");
+var SNMT_token = artifacts.require("./SNMTToken.sol");
 var deals = artifacts.require("./Deals.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(deals, tsc_token.address);
+  deployer.deploy(deals, SNMT_token.address);
 };

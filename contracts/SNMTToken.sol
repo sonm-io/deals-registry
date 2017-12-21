@@ -4,6 +4,7 @@ pragma solidity ^0.4.15;
 import 'zeppelin-solidity/contracts/token/StandardToken.sol';
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 
+
 contract SNMTToken is StandardToken, Ownable {
 
     string public name = "SONM test token";
@@ -19,21 +20,21 @@ contract SNMTToken is StandardToken, Ownable {
     }
 
     function mintToken(address target, uint256 mintedAmount) onlyOwner public returns (bool){
-        balances[target].add(mintedAmount);
-        totalSupply.add(mintedAmount);
+        balances[target] = balances[target].add(mintedAmount);
+        totalSupply = totalSupply.add(mintedAmount);
         GiveAway(target, mintedAmount);
     }
 
     // @dev Gives the sender 100 SNMT's,
     function getTokens() public returns (bool){
-      uint256 value = 100 * 10e18;
-      balances[msg.sender] = balances[msg.sender].add(value);
-      totalSupply.add(value);
-      GiveAway(msg.sender, value);
-      return true;
+        uint256 value = 100 * (10 ** decimals);
+        balances[msg.sender] = balances[msg.sender].add(value);
+        totalSupply = totalSupply.add(value);
+        GiveAway(msg.sender, value);
+        return true;
     }
 
-    function () payable {
-      getTokens();
+    function() payable {
+        getTokens();
     }
 }

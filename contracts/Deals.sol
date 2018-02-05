@@ -57,7 +57,9 @@ contract Deals {
         blockedBalance[dealAmount] = blockedBalance[dealAmount].add(_price);
 
         dealsIndex[_client].push(dealAmount);
-        dealsIndex[_hub].push(dealAmount);
+        if (_hub != _client){
+            dealsIndex[_hub].push(dealAmount);
+        }
 
         DealOpened(_hub, _client, dealAmount);
     }

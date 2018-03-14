@@ -7,17 +7,19 @@ import (
 	"math/big"
 	"strings"
 
+	ethereum "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/event"
 )
 
 // SNMTTokenABI is the input ABI used to generate the binding from.
-const SNMTTokenABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_spender\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_from\",\"type\":\"address\"},{\"name\":\"_to\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"balance\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"target\",\"type\":\"address\"},{\"name\":\"mintedAmount\",\"type\":\"uint256\"}],\"name\":\"mintToken\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"getTokens\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\"},{\"name\":\"_spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"name\":\"remaining\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"type\":\"constructor\"},{\"payable\":true,\"type\":\"fallback\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"whom\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"GiveAway\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"spender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}]"
+const SNMTTokenABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_spender\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_from\",\"type\":\"address\"},{\"name\":\"_to\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"balance\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"target\",\"type\":\"address\"},{\"name\":\"mintedAmount\",\"type\":\"uint256\"}],\"name\":\"mintToken\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"},{\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"getTokens\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\"},{\"name\":\"_spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"name\":\"remaining\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"whom\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"GiveAway\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"spender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}]"
 
 // SNMTTokenBin is the compiled bytecode used for deploying new contracts.
-const SNMTTokenBin = `0x606060405260408051908101604052600f81527f534f4e4d207465737420746f6b656e00000000000000000000000000000000006020820152600490805161004b9291602001906100e3565b5060408051908101604052600481527f534e4d5400000000000000000000000000000000000000000000000000000000602082015260059080516100939291602001906100e3565b50601260065534156100a457600080fd5b5b5b60038054600160a060020a03191633600160a060020a03161790555b60038054600160a060020a03191633600160a060020a03161790555b610183565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f1061012457805160ff1916838001178555610151565b82800160010185558215610151579182015b82811115610151578251825591602001919060010190610136565b5b5061015e929150610162565b5090565b61018091905b8082111561015e5760008155600101610168565b5090565b90565b610a17806101926000396000f300606060405236156100c25763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166306fdde0381146100cf578063095ea7b31461015a57806318160ddd1461019057806323b872dd146101b5578063313ce567146101f157806370a082311461021657806379c65068146102475780638da5cb5b1461027d57806395d89b41146102ac578063a9059cbb14610337578063aa6ca8081461036d578063dd62ed3e14610394578063f2fde38b146103cb575b5b6100cb6103ec565b505b005b34156100da57600080fd5b6100e261049b565b60405160208082528190810183818151815260200191508051906020019080838360005b8381101561011f5780820151818401525b602001610106565b50505050905090810190601f16801561014c5780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b341561016557600080fd5b61017c600160a060020a0360043516602435610539565b604051901515815260200160405180910390f35b341561019b57600080fd5b6101a36105e0565b60405190815260200160405180910390f35b34156101c057600080fd5b61017c600160a060020a03600435811690602435166044356105e6565b604051901515815260200160405180910390f35b34156101fc57600080fd5b6101a36106fb565b60405190815260200160405180910390f35b341561022157600080fd5b6101a3600160a060020a0360043516610701565b60405190815260200160405180910390f35b341561025257600080fd5b61017c600160a060020a0360043516602435610720565b604051901515815260200160405180910390f35b341561028857600080fd5b6102906107c8565b604051600160a060020a03909116815260200160405180910390f35b34156102b757600080fd5b6100e26107d7565b60405160208082528190810183818151815260200191508051906020019080838360005b8381101561011f5780820151818401525b602001610106565b50505050905090810190601f16801561014c5780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b341561034257600080fd5b61017c600160a060020a0360043516602435610875565b604051901515815260200160405180910390f35b341561037857600080fd5b61017c6103ec565b604051901515815260200160405180910390f35b341561039f57600080fd5b6101a3600160a060020a0360043581169060243516610935565b60405190815260200160405180910390f35b34156103d657600080fd5b6100cd600160a060020a0360043516610962565b005b600160a060020a033316600090815260016020526040812054683635c9adc5dea0000090610420908263ffffffff6109ba16565b600160a060020a0333166000908152600160205260408120919091555461044d908263ffffffff6109ba16565b507fe08e9d066634006283658128ec91f58d444719d7a07d49f72924da4352ff94ad3382604051600160a060020a03909216825260208201526040908101905180910390a1600191505b5090565b60048054600181600116156101000203166002900480601f0160208091040260200160405190810160405280929190818152602001828054600181600116156101000203166002900480156105315780601f1061050657610100808354040283529160200191610531565b820191906000526020600020905b81548152906001019060200180831161051457829003601f168201915b505050505081565b600081158061056b5750600160a060020a03338116600090815260026020908152604080832093871683529290522054155b151561057657600080fd5b600160a060020a03338116600081815260026020908152604080832094881680845294909152908190208590557f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b9259085905190815260200160405180910390a35060015b92915050565b60005481565b600160a060020a03808416600090815260026020908152604080832033851684528252808320549386168352600190915281205490919061062d908463ffffffff6109ba16565b600160a060020a038086166000908152600160205260408082209390935590871681522054610662908463ffffffff6109d416565b600160a060020a03861660009081526001602052604090205561068b818463ffffffff6109d416565b600160a060020a03808716600081815260026020908152604080832033861684529091529081902093909355908616917fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef9086905190815260200160405180910390a3600191505b509392505050565b60065481565b600160a060020a0381166000908152600160205260409020545b919050565b60035460009033600160a060020a0390811691161461073e57600080fd5b600160a060020a038316600090815260016020526040902054610767908363ffffffff6109ba16565b5060005461077b908363ffffffff6109ba16565b507fe08e9d066634006283658128ec91f58d444719d7a07d49f72924da4352ff94ad8383604051600160a060020a03909216825260208201526040908101905180910390a15b5b92915050565b600354600160a060020a031681565b60058054600181600116156101000203166002900480601f0160208091040260200160405190810160405280929190818152602001828054600181600116156101000203166002900480156105315780601f1061050657610100808354040283529160200191610531565b820191906000526020600020905b81548152906001019060200180831161051457829003601f168201915b505050505081565b600160a060020a03331660009081526001602052604081205461089e908363ffffffff6109d416565b600160a060020a0333811660009081526001602052604080822093909355908516815220546108d3908363ffffffff6109ba16565b600160a060020a0380851660008181526001602052604090819020939093559133909116907fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef9085905190815260200160405180910390a35060015b92915050565b600160a060020a038083166000908152600260209081526040808320938516835292905220545b92915050565b60035433600160a060020a0390811691161461097d57600080fd5b600160a060020a038116156109b5576003805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0383161790555b5b5b50565b6000828201838110156109c957fe5b8091505b5092915050565b6000828211156109e057fe5b508082035b929150505600a165627a7a7230582087490a420d63e3c81b42e0375d076ffcd38c7996ae9ca072d965fd088e0f1cf60029`
+const SNMTTokenBin = `0x60606040526040805190810160405280600f81526020017f534f4e4d207465737420746f6b656e0000000000000000000000000000000000815250600490805190602001906200005192919062000139565b506040805190810160405280600481526020017f534e4d5400000000000000000000000000000000000000000000000000000000815250600590805190602001906200009f92919062000139565b5060126006553415620000b157600080fd5b33600360006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555033600360006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550620001e8565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f106200017c57805160ff1916838001178555620001ad565b82800160010185558215620001ad579182015b82811115620001ac5782518255916020019190600101906200018f565b5b509050620001bc9190620001c0565b5090565b620001e591905b80821115620001e1576000816000905550600101620001c7565b5090565b90565b61113480620001f86000396000f3006060604052600436106100c5576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806306fdde03146100d0578063095ea7b31461015e57806318160ddd146101b857806323b872dd146101e1578063313ce5671461025a57806370a082311461028357806379c65068146102d05780638da5cb5b1461032a57806395d89b411461037f578063a9059cbb1461040d578063aa6ca80814610467578063dd62ed3e14610494578063f2fde38b14610500575b6100cd610539565b50005b34156100db57600080fd5b6100e361066b565b6040518080602001828103825283818151815260200191508051906020019080838360005b83811015610123578082015181840152602081019050610108565b50505050905090810190601f1680156101505780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b341561016957600080fd5b61019e600480803573ffffffffffffffffffffffffffffffffffffffff16906020019091908035906020019091905050610709565b604051808215151515815260200191505060405180910390f35b34156101c357600080fd5b6101cb610890565b6040518082815260200191505060405180910390f35b34156101ec57600080fd5b610240600480803573ffffffffffffffffffffffffffffffffffffffff1690602001909190803573ffffffffffffffffffffffffffffffffffffffff16906020019091908035906020019091905050610896565b604051808215151515815260200191505060405180910390f35b341561026557600080fd5b61026d610b46565b6040518082815260200191505060405180910390f35b341561028e57600080fd5b6102ba600480803573ffffffffffffffffffffffffffffffffffffffff16906020019091905050610b4c565b6040518082815260200191505060405180910390f35b34156102db57600080fd5b610310600480803573ffffffffffffffffffffffffffffffffffffffff16906020019091908035906020019091905050610b95565b604051808215151515815260200191505060405180910390f35b341561033557600080fd5b61033d610d14565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b341561038a57600080fd5b610392610d3a565b6040518080602001828103825283818151815260200191508051906020019080838360005b838110156103d25780820151818401526020810190506103b7565b50505050905090810190601f1680156103ff5780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b341561041857600080fd5b61044d600480803573ffffffffffffffffffffffffffffffffffffffff16906020019091908035906020019091905050610dd8565b604051808215151515815260200191505060405180910390f35b341561047257600080fd5b61047a610539565b604051808215151515815260200191505060405180910390f35b341561049f57600080fd5b6104ea600480803573ffffffffffffffffffffffffffffffffffffffff1690602001909190803573ffffffffffffffffffffffffffffffffffffffff16906020019091905050610f73565b6040518082815260200191505060405180910390f35b341561050b57600080fd5b610537600480803573ffffffffffffffffffffffffffffffffffffffff16906020019091905050610ffa565b005b60008068056bc75e2d63100000905061059a81600160003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020546110d190919063ffffffff16565b600160003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055506105f2816000546110d190919063ffffffff16565b6000819055507fe08e9d066634006283658128ec91f58d444719d7a07d49f72924da4352ff94ad3382604051808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019250505060405180910390a1600191505090565b60048054600181600116156101000203166002900480601f0160208091040260200160405190810160405280929190818152602001828054600181600116156101000203166002900480156107015780601f106106d657610100808354040283529160200191610701565b820191906000526020600020905b8154815290600101906020018083116106e457829003601f168201915b505050505081565b60008082148061079557506000600260003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054145b15156107a057600080fd5b81600260003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055508273ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff167f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925846040518082815260200191505060405180910390a36001905092915050565b60005481565b600080600260008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054905061096a83600160008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020546110d190919063ffffffff16565b600160008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055506109ff83600160008873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020546110ef90919063ffffffff16565b600160008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002081905550610a5583826110ef90919063ffffffff16565b600260008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055508373ffffffffffffffffffffffffffffffffffffffff168573ffffffffffffffffffffffffffffffffffffffff167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef856040518082815260200191505060405180910390a360019150509392505050565b60065481565b6000600160008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020549050919050565b6000600360009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16141515610bf357600080fd5b610c4582600160008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020546110d190919063ffffffff16565b600160008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002081905550610c9d826000546110d190919063ffffffff16565b6000819055507fe08e9d066634006283658128ec91f58d444719d7a07d49f72924da4352ff94ad8383604051808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019250505060405180910390a192915050565b600360009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b60058054600181600116156101000203166002900480601f016020809104026020016040519081016040528092919081815260200182805460018160011615610100020316600290048015610dd05780601f10610da557610100808354040283529160200191610dd0565b820191906000526020600020905b815481529060010190602001808311610db357829003601f168201915b505050505081565b6000610e2c82600160003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020546110ef90919063ffffffff16565b600160003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002081905550610ec182600160008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020546110d190919063ffffffff16565b600160008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055508273ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef846040518082815260200191505060405180910390a36001905092915050565b6000600260008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054905092915050565b600360009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614151561105657600080fd5b600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff161415156110ce5780600360006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505b50565b60008082840190508381101515156110e557fe5b8091505092915050565b60008282111515156110fd57fe5b8183039050929150505600a165627a7a72305820097fd2997980eaea213e49b81124afd30d5f6ada8fa9b857dc05b6bd61a0bd7a0029`
 
 // DeploySNMTToken deploys a new Ethereum contract, binding an instance of SNMTToken to it.
 func DeploySNMTToken(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *SNMTToken, error) {
@@ -29,13 +31,14 @@ func DeploySNMTToken(auth *bind.TransactOpts, backend bind.ContractBackend) (com
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
-	return address, tx, &SNMTToken{SNMTTokenCaller: SNMTTokenCaller{contract: contract}, SNMTTokenTransactor: SNMTTokenTransactor{contract: contract}}, nil
+	return address, tx, &SNMTToken{SNMTTokenCaller: SNMTTokenCaller{contract: contract}, SNMTTokenTransactor: SNMTTokenTransactor{contract: contract}, SNMTTokenFilterer: SNMTTokenFilterer{contract: contract}}, nil
 }
 
 // SNMTToken is an auto generated Go binding around an Ethereum contract.
 type SNMTToken struct {
 	SNMTTokenCaller     // Read-only binding to the contract
 	SNMTTokenTransactor // Write-only binding to the contract
+	SNMTTokenFilterer   // Log filterer for contract events
 }
 
 // SNMTTokenCaller is an auto generated read-only Go binding around an Ethereum contract.
@@ -45,6 +48,11 @@ type SNMTTokenCaller struct {
 
 // SNMTTokenTransactor is an auto generated write-only Go binding around an Ethereum contract.
 type SNMTTokenTransactor struct {
+	contract *bind.BoundContract // Generic contract wrapper for the low level calls
+}
+
+// SNMTTokenFilterer is an auto generated log filtering Go binding around an Ethereum contract events.
+type SNMTTokenFilterer struct {
 	contract *bind.BoundContract // Generic contract wrapper for the low level calls
 }
 
@@ -87,16 +95,16 @@ type SNMTTokenTransactorRaw struct {
 
 // NewSNMTToken creates a new instance of SNMTToken, bound to a specific deployed contract.
 func NewSNMTToken(address common.Address, backend bind.ContractBackend) (*SNMTToken, error) {
-	contract, err := bindSNMTToken(address, backend, backend)
+	contract, err := bindSNMTToken(address, backend, backend, backend)
 	if err != nil {
 		return nil, err
 	}
-	return &SNMTToken{SNMTTokenCaller: SNMTTokenCaller{contract: contract}, SNMTTokenTransactor: SNMTTokenTransactor{contract: contract}}, nil
+	return &SNMTToken{SNMTTokenCaller: SNMTTokenCaller{contract: contract}, SNMTTokenTransactor: SNMTTokenTransactor{contract: contract}, SNMTTokenFilterer: SNMTTokenFilterer{contract: contract}}, nil
 }
 
 // NewSNMTTokenCaller creates a new read-only instance of SNMTToken, bound to a specific deployed contract.
 func NewSNMTTokenCaller(address common.Address, caller bind.ContractCaller) (*SNMTTokenCaller, error) {
-	contract, err := bindSNMTToken(address, caller, nil)
+	contract, err := bindSNMTToken(address, caller, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -105,20 +113,29 @@ func NewSNMTTokenCaller(address common.Address, caller bind.ContractCaller) (*SN
 
 // NewSNMTTokenTransactor creates a new write-only instance of SNMTToken, bound to a specific deployed contract.
 func NewSNMTTokenTransactor(address common.Address, transactor bind.ContractTransactor) (*SNMTTokenTransactor, error) {
-	contract, err := bindSNMTToken(address, nil, transactor)
+	contract, err := bindSNMTToken(address, nil, transactor, nil)
 	if err != nil {
 		return nil, err
 	}
 	return &SNMTTokenTransactor{contract: contract}, nil
 }
 
+// NewSNMTTokenFilterer creates a new log filterer instance of SNMTToken, bound to a specific deployed contract.
+func NewSNMTTokenFilterer(address common.Address, filterer bind.ContractFilterer) (*SNMTTokenFilterer, error) {
+	contract, err := bindSNMTToken(address, nil, nil, filterer)
+	if err != nil {
+		return nil, err
+	}
+	return &SNMTTokenFilterer{contract: contract}, nil
+}
+
 // bindSNMTToken binds a generic wrapper to an already deployed contract.
-func bindSNMTToken(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor) (*bind.BoundContract, error) {
+func bindSNMTToken(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
 	parsed, err := abi.JSON(strings.NewReader(SNMTTokenABI))
 	if err != nil {
 		return nil, err
 	}
-	return bind.NewBoundContract(address, parsed, caller, transactor), nil
+	return bind.NewBoundContract(address, parsed, caller, transactor, filterer), nil
 }
 
 // Call invokes the (constant) contract method with params as input values and
@@ -465,4 +482,411 @@ func (_SNMTToken *SNMTTokenSession) TransferOwnership(newOwner common.Address) (
 // Solidity: function transferOwnership(newOwner address) returns()
 func (_SNMTToken *SNMTTokenTransactorSession) TransferOwnership(newOwner common.Address) (*types.Transaction, error) {
 	return _SNMTToken.Contract.TransferOwnership(&_SNMTToken.TransactOpts, newOwner)
+}
+
+// SNMTTokenApprovalIterator is returned from FilterApproval and is used to iterate over the raw logs and unpacked data for Approval events raised by the SNMTToken contract.
+type SNMTTokenApprovalIterator struct {
+	Event *SNMTTokenApproval // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *SNMTTokenApprovalIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(SNMTTokenApproval)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(SNMTTokenApproval)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *SNMTTokenApprovalIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *SNMTTokenApprovalIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// SNMTTokenApproval represents a Approval event raised by the SNMTToken contract.
+type SNMTTokenApproval struct {
+	Owner   common.Address
+	Spender common.Address
+	Value   *big.Int
+	Raw     types.Log // Blockchain specific contextual infos
+}
+
+// FilterApproval is a free log retrieval operation binding the contract event 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925.
+//
+// Solidity: event Approval(owner indexed address, spender indexed address, value uint256)
+func (_SNMTToken *SNMTTokenFilterer) FilterApproval(opts *bind.FilterOpts, owner []common.Address, spender []common.Address) (*SNMTTokenApprovalIterator, error) {
+
+	var ownerRule []interface{}
+	for _, ownerItem := range owner {
+		ownerRule = append(ownerRule, ownerItem)
+	}
+	var spenderRule []interface{}
+	for _, spenderItem := range spender {
+		spenderRule = append(spenderRule, spenderItem)
+	}
+
+	logs, sub, err := _SNMTToken.contract.FilterLogs(opts, "Approval", ownerRule, spenderRule)
+	if err != nil {
+		return nil, err
+	}
+	return &SNMTTokenApprovalIterator{contract: _SNMTToken.contract, event: "Approval", logs: logs, sub: sub}, nil
+}
+
+// WatchApproval is a free log subscription operation binding the contract event 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925.
+//
+// Solidity: event Approval(owner indexed address, spender indexed address, value uint256)
+func (_SNMTToken *SNMTTokenFilterer) WatchApproval(opts *bind.WatchOpts, sink chan<- *SNMTTokenApproval, owner []common.Address, spender []common.Address) (event.Subscription, error) {
+
+	var ownerRule []interface{}
+	for _, ownerItem := range owner {
+		ownerRule = append(ownerRule, ownerItem)
+	}
+	var spenderRule []interface{}
+	for _, spenderItem := range spender {
+		spenderRule = append(spenderRule, spenderItem)
+	}
+
+	logs, sub, err := _SNMTToken.contract.WatchLogs(opts, "Approval", ownerRule, spenderRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(SNMTTokenApproval)
+				if err := _SNMTToken.contract.UnpackLog(event, "Approval", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// SNMTTokenGiveAwayIterator is returned from FilterGiveAway and is used to iterate over the raw logs and unpacked data for GiveAway events raised by the SNMTToken contract.
+type SNMTTokenGiveAwayIterator struct {
+	Event *SNMTTokenGiveAway // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *SNMTTokenGiveAwayIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(SNMTTokenGiveAway)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(SNMTTokenGiveAway)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *SNMTTokenGiveAwayIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *SNMTTokenGiveAwayIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// SNMTTokenGiveAway represents a GiveAway event raised by the SNMTToken contract.
+type SNMTTokenGiveAway struct {
+	Whom   common.Address
+	Amount *big.Int
+	Raw    types.Log // Blockchain specific contextual infos
+}
+
+// FilterGiveAway is a free log retrieval operation binding the contract event 0xe08e9d066634006283658128ec91f58d444719d7a07d49f72924da4352ff94ad.
+//
+// Solidity: event GiveAway(whom address, amount uint256)
+func (_SNMTToken *SNMTTokenFilterer) FilterGiveAway(opts *bind.FilterOpts) (*SNMTTokenGiveAwayIterator, error) {
+
+	logs, sub, err := _SNMTToken.contract.FilterLogs(opts, "GiveAway")
+	if err != nil {
+		return nil, err
+	}
+	return &SNMTTokenGiveAwayIterator{contract: _SNMTToken.contract, event: "GiveAway", logs: logs, sub: sub}, nil
+}
+
+// WatchGiveAway is a free log subscription operation binding the contract event 0xe08e9d066634006283658128ec91f58d444719d7a07d49f72924da4352ff94ad.
+//
+// Solidity: event GiveAway(whom address, amount uint256)
+func (_SNMTToken *SNMTTokenFilterer) WatchGiveAway(opts *bind.WatchOpts, sink chan<- *SNMTTokenGiveAway) (event.Subscription, error) {
+
+	logs, sub, err := _SNMTToken.contract.WatchLogs(opts, "GiveAway")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(SNMTTokenGiveAway)
+				if err := _SNMTToken.contract.UnpackLog(event, "GiveAway", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// SNMTTokenTransferIterator is returned from FilterTransfer and is used to iterate over the raw logs and unpacked data for Transfer events raised by the SNMTToken contract.
+type SNMTTokenTransferIterator struct {
+	Event *SNMTTokenTransfer // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *SNMTTokenTransferIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(SNMTTokenTransfer)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(SNMTTokenTransfer)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *SNMTTokenTransferIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *SNMTTokenTransferIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// SNMTTokenTransfer represents a Transfer event raised by the SNMTToken contract.
+type SNMTTokenTransfer struct {
+	From  common.Address
+	To    common.Address
+	Value *big.Int
+	Raw   types.Log // Blockchain specific contextual infos
+}
+
+// FilterTransfer is a free log retrieval operation binding the contract event 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef.
+//
+// Solidity: event Transfer(from indexed address, to indexed address, value uint256)
+func (_SNMTToken *SNMTTokenFilterer) FilterTransfer(opts *bind.FilterOpts, from []common.Address, to []common.Address) (*SNMTTokenTransferIterator, error) {
+
+	var fromRule []interface{}
+	for _, fromItem := range from {
+		fromRule = append(fromRule, fromItem)
+	}
+	var toRule []interface{}
+	for _, toItem := range to {
+		toRule = append(toRule, toItem)
+	}
+
+	logs, sub, err := _SNMTToken.contract.FilterLogs(opts, "Transfer", fromRule, toRule)
+	if err != nil {
+		return nil, err
+	}
+	return &SNMTTokenTransferIterator{contract: _SNMTToken.contract, event: "Transfer", logs: logs, sub: sub}, nil
+}
+
+// WatchTransfer is a free log subscription operation binding the contract event 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef.
+//
+// Solidity: event Transfer(from indexed address, to indexed address, value uint256)
+func (_SNMTToken *SNMTTokenFilterer) WatchTransfer(opts *bind.WatchOpts, sink chan<- *SNMTTokenTransfer, from []common.Address, to []common.Address) (event.Subscription, error) {
+
+	var fromRule []interface{}
+	for _, fromItem := range from {
+		fromRule = append(fromRule, fromItem)
+	}
+	var toRule []interface{}
+	for _, toItem := range to {
+		toRule = append(toRule, toItem)
+	}
+
+	logs, sub, err := _SNMTToken.contract.WatchLogs(opts, "Transfer", fromRule, toRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(SNMTTokenTransfer)
+				if err := _SNMTToken.contract.UnpackLog(event, "Transfer", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
 }

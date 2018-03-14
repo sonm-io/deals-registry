@@ -25,9 +25,9 @@ const (
 )
 
 type SolidityArtifact struct {
-	Name string        `json:"contract_name"`
+	Name string        `json:"contractName"`
 	ABI  []interface{} `json:"abi"`
-	Bin  string        `json:"unlinked_binary"`
+	Bin  string        `json:"bytecode"`
 }
 
 func dieSoon(e error, msg string) {
